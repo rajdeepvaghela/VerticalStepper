@@ -1,11 +1,11 @@
 package com.rdapps.verticalstepperexample
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -14,13 +14,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.rdapps.stepper.Step
 import com.rdapps.stepper.StepData
 import com.rdapps.stepper.StepState
 import com.rdapps.verticalstepperexample.ui.theme.VerticalStepperTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivity"
 
@@ -44,7 +48,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp)
     ) {
         var stageList by remember {
             mutableStateOf(
@@ -72,12 +78,24 @@ fun MainScreen() {
             )
         }
 
+        val coroutineScope = rememberCoroutineScope()
+
         stageList.forEach {
             Step(
                 stepData = it,
                 useAlternateComponent = it.id == 2L,
                 alternateComponent = {
-                    Button(onClick = { }) {
+                    Button(onClick = {
+                        stageList = stageList.map { stage ->
+                            if (stage.id == 3L) {
+                                stage.copy(stepState = StepState.Active())
+                            } else if (stage.id == 1L || stage.id == 2L) {
+                                stage.copy(stepState = StepState.Visible)
+                            } else {
+                                stage
+                            }
+                        }
+                    }) {
                         Text(text = "Done")
                     }
                 }
@@ -100,12 +118,25 @@ fun MainScreen() {
                     }
                 }
 
+
                 if (nextElement == null) {
-                    stageList = stageList.map { stage ->
-                        if (stage.id == 1L) {
-                            stage.copy(stepState = StepState.Active())
-                        } else {
-                            stage
+                    coroutineScope.launch {
+                        stageList = stageList.map { stage ->
+                            if (stage.id == 1L) {
+                                stage.copy(stepState = StepState.Active())
+                            } else {
+                                stage
+                            }
+                        }
+
+                        delay(13000)
+
+                        stageList = stageList.map { stage ->
+                            if (stage.id == 2L) {
+                                stage.copy(stepState = StepState.Active())
+                            } else {
+                                stage
+                            }
                         }
                     }
                 }
