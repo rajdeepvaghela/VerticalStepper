@@ -3,7 +3,7 @@
 [![Release](https://img.shields.io/github/v/release/rajdeepvaghela/VerticalStepper)](https://github.com/rajdeepvaghela/VerticalStepper/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-It is a Horizontal view slider which will snap the middle item, with the scale effect.
+It is a customizable vertical stepper with ability to animate and use custom layouts for the content.
 
 ![Screen_recording_20240718_125304-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/8517efee-24ee-4a1c-b3bf-94620eaf3960)
 
@@ -39,7 +39,25 @@ dependencies {
         }
     )
 ```
+To use a custom layout for a stepper 
+```kotlin
+    Step(
+        stepData = stepData,
+        useAlternateComponent = true,
+        alternateComponent = {
+            Button(
+                onClick = {
+                    // do something
+                }
+            ) {
+                Text(text = "Proceed")
+            }
+        },
+        onAnimationDone = {
 
+        }
+    )
+```
 ## License
 ```
 Copyright 2024 Rajdeep Vaghela
