@@ -1,5 +1,6 @@
 # Vertical Stepper
-[![Release](https://jitpack.io/v/com.github.rajdeepvaghela/VerticalStepper.svg)](https://jitpack.io/#com.github.rajdeepvaghela/VerticalStepper)
+[![Release](https://img.shields.io/badge/Platform-ComposeMultiplatform-brightgreen.svg)](https://kotlinlang.org/compose-multiplatform)
+[![Release](https://img.shields.io/maven-central/v/io.github.rajdeepvaghela/stepper)](https://img.shields.io/maven-central/v/io.github.rajdeepvaghela/stepper)
 [![Release](https://img.shields.io/github/v/release/rajdeepvaghela/VerticalStepper)](https://github.com/rajdeepvaghela/VerticalStepper/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -9,19 +10,15 @@ It is a customizable vertical stepper with ability to animate and use custom lay
 
 ## Installation
 Add it in your root build.gradle or settings.gradle at the end of repositories:
-```gradle
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-      mavenCentral()
-      maven { url 'https://jitpack.io' }
-    }
+```kts
+repositories {
+  mavenCentral()
 }
 ```
 Add the dependency
-```gradle
+```kts
 dependencies {
-    implementation 'com.github.rajdeepvaghela:VerticalStepper:1.0.0'
+    implementation("io.github.rajdeepvaghela:viewslider:2.0.0")
 }
 ```
 ## Usage
