@@ -1,62 +1,84 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
-    alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinMultiplatformLibrary)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.vanniktech.mavenPublish)
     id("maven-publish")
 }
 
-android {
-    namespace = "com.rdapps.stepper"
-    compileSdk = 34
+val libGroup = "io.github.rajdeepvaghela"
+val libVersion = "2.0.0"
 
-    defaultConfig {
-        minSdk = 21
+kotlin {
+
+    android {
+        namespace = "com.rdapps.stepper"
+        compileSdk = 36
+        minSdk = 23
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+    jvm()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    js { browser() }
+    wasmJs { browser() }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.animation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.ui)
+            implementation(libs.androidx.material.icons.extended)
+        }
+
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
 }
 
-dependencies {
+mavenPublishing {
+    publishToMavenCentral()
 
-    implementation(libs.androidx.core.ktx)
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.animation)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.constraint.layout)
-}
+    signAllPublications()
 
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            groupId = "com.rdapps"
-            artifactId = project.name
-            version = "1.0.0"
+    coordinates(libGroup, "stepper", libVersion)
 
-            afterEvaluate {
-                from(components["release"])
+    pom {
+        name = "Vertical Stepper"
+        description = "A customizable vertical stepper with ability to animate and use custom layouts for the content "
+        inceptionYear = "2024"
+        url = "https://github.com/rajdeepvaghela/VerticalStepper"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
             }
+        }
+        developers {
+            developer {
+                id = "rajdeepvaghela"
+                name = "Rajdeep Vaghela"
+                url = "https://github.com/rajdeepvaghela"
+            }
+        }
+        scm {
+            url = "https://github.com/rajdeepvaghela/VerticalStepper"
+            connection = "scm:git:git://github.com/rajdeepvaghela/VerticalStepper.git"
+            developerConnection = "scm:git:git://github.com/rajdeepvaghela/VerticalStepper.git"
         }
     }
 }

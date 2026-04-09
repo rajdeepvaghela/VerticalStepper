@@ -1,22 +1,20 @@
 package com.rdapps.stepper
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationConstants
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,9 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
+import com.rdapps.stepper.utils.doIf
 import kotlinx.coroutines.delay
 import kotlin.reflect.KClass
 
@@ -48,6 +47,8 @@ fun Step(
     stepData: StepData,
     modifier: Modifier = Modifier,
     isStatic: Boolean = false,
+    accentColor: Color = Color.Blue,
+    textColor: Color = Color.Black,
     useAlternateComponent: Boolean = false,
     alternateComponent: @Composable () -> Unit = {},
     onAnimationDone: (isLast: Boolean) -> Unit = {},
@@ -93,23 +94,30 @@ fun Step(
         }
     }
 
-    ConstraintLayout(
-        modifier = modifier.fillMaxWidth()
+    val density = LocalDensity.current
+    var isContentExpanding by remember { mutableStateOf(true) }
+    var contentHeightPx by remember { mutableStateOf(0) }
+    val animatedContentHeightPx by animateIntAsState(
+        targetValue = contentHeightPx,
+        animationSpec = tween(easing = LinearOutSlowInEasing)
+    )
+
+    Row(
+        modifier = modifier.fillMaxWidth().doIf(isContentExpanding) {
+            animateContentSize()
+        }
     ) {
-        val (indicator, body) = createRefs()
-
+        // Left indicator section
         Column(
-            modifier = Modifier.constrainAs(indicator) {
-                start.linkTo(parent.start)
-                top.linkTo(body.top)
-                bottom.linkTo(body.bottom)
-
-                height = Dimension.fillToConstraints
-            },
+            modifier = Modifier.height(with(density) { animatedContentHeightPx.toDp() })
+                .doIf(!isContentExpanding) {
+                    animateContentSize()
+                },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             IndicatorIcon(
                 stepState = stepData.stepState,
+                accentColor = accentColor,
                 toBeAnimated = currentAnimationElement is AnimationElement.Indicator
             ) {
                 AnimationElement.Indicator::class.markAsDone()
@@ -147,7 +155,7 @@ fun Step(
                         modifier = Modifier
                             .width(1.dp)
                             .fillMaxHeight(heightPercent.value)
-                            .background(color = MaterialTheme.colorScheme.outline)
+                            .background(color = accentColor)
                     )
 
                     val animateHeight by animateFloatAsState(
@@ -169,16 +177,16 @@ fun Step(
             }
         }
 
+        // Title and content
         Column(
             modifier = Modifier
-                .constrainAs(body) {
-                    start.linkTo(indicator.end, margin = 12.dp)
-                    top.linkTo(parent.top)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-
-                    width = Dimension.fillToConstraints
-                    height = Dimension.wrapContent
+                .padding(start = 12.dp)
+                .weight(1f)
+                .onGloballyPositioned {
+                    if (it.size.height != contentHeightPx) {
+                        isContentExpanding = it.size.height > contentHeightPx
+                    }
+                    contentHeightPx = it.size.height
                 }
         ) {
             var animatedTitle by remember {
@@ -196,6 +204,24 @@ fun Step(
 
                     animatedTitle = animatedTitle.removeSuffix("|")
                     AnimationElement.Title::class.markAsDone()
+                } else {
+                    when (stepData.stepState) {
+                        is StepState.Active,
+                        is StepState.Done,
+                        StepState.Error,
+                        StepState.Loading,
+                        StepState.Visible -> {
+                            animatedTitle = stepData.title
+                        }
+
+                        StepState.InitiallyAnimating -> {
+                            // ignore
+                        }
+
+                        StepState.InQueue -> {
+                            animatedTitle = ""
+                        }
+                    }
                 }
             }
 
@@ -207,6 +233,7 @@ fun Step(
             Text(
                 text = animatedTitle,
                 style = MaterialTheme.typography.labelLarge,
+                color = textColor,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -279,33 +306,18 @@ fun Step(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 if (useAlternateComponent) {
-                    AnimatedVisibility(
-                        visible = isVisible,
-                        enter = expandVertically(
-                            animationSpec = tween()
-                        ) + fadeIn(
-                            animationSpec = tween(delayMillis = AnimationConstants.DefaultDurationMillis)
-                        ),
-                        exit = shrinkVertically(
-                            animationSpec = tween(delayMillis = AnimationConstants.DefaultDurationMillis),
-                            shrinkTowards = Alignment.Top
-                        ) + fadeOut(
-                            animationSpec = tween()
-                        )
-                    ) {
+                    if (isVisible) {
                         alternateComponent()
                     }
-
                 } else {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateContentSize(animationSpec = tween())
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         @Composable
                         fun getTextView(text: String, isVisible: Boolean) = Text(
                             text = text,
                             style = MaterialTheme.typography.bodySmall,
+                            color = textColor,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .alpha(if (isVisible) 1f else 0f)

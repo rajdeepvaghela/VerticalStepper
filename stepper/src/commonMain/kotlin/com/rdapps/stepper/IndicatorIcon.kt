@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -19,11 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun IndicatorIcon(stepState: StepState, toBeAnimated: Boolean, onAnimationDone: () -> Unit) {
+fun IndicatorIcon(
+    stepState: StepState,
+    toBeAnimated: Boolean,
+    accentColor: Color,
+    onAnimationDone: () -> Unit
+) {
     Box(modifier = Modifier.size(MaterialTheme.typography.bodyMedium.fontSize.value.dp + 4.dp)) {
         when (stepState) {
             StepState.InitiallyAnimating -> {
@@ -48,7 +55,7 @@ fun IndicatorIcon(stepState: StepState, toBeAnimated: Boolean, onAnimationDone: 
                         .matchParentSize()
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = accentColor,
                             shape = CircleShape
                         )
                 )
@@ -60,7 +67,7 @@ fun IndicatorIcon(stepState: StepState, toBeAnimated: Boolean, onAnimationDone: 
                         .matchParentSize()
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = accentColor,
                             shape = CircleShape
                         )
                 )
@@ -72,14 +79,14 @@ fun IndicatorIcon(stepState: StepState, toBeAnimated: Boolean, onAnimationDone: 
                         .matchParentSize()
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = accentColor,
                             shape = CircleShape
                         )
                 )
 
                 CircularProgressIndicator(
                     modifier = Modifier.matchParentSize(),
-                    color = MaterialTheme.colorScheme.onBackground,
+                    trackColor = accentColor,
                     strokeWidth = 3.dp
                 )
             }
@@ -90,7 +97,7 @@ fun IndicatorIcon(stepState: StepState, toBeAnimated: Boolean, onAnimationDone: 
                         .matchParentSize()
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = accentColor,
                             shape = CircleShape
                         )
                 )
@@ -100,7 +107,7 @@ fun IndicatorIcon(stepState: StepState, toBeAnimated: Boolean, onAnimationDone: 
                         stepState.progress
                     },
                     modifier = Modifier.matchParentSize(),
-                    color = stepState.color,
+                    trackColor = stepState.color,
                     strokeWidth = 3.dp,
                 )
             }
@@ -128,12 +135,12 @@ fun IndicatorIcon(stepState: StepState, toBeAnimated: Boolean, onAnimationDone: 
                 )
 
                 Image(
-                    painter = painterResource(id = R.drawable.ic_check_24),
+                    imageVector = Icons.Rounded.Check,
                     modifier = Modifier
                         .alpha(animatedAlpha.value)
                         .size(10.dp)
                         .align(Alignment.Center),
-                    colorFilter = ColorFilter.tint(color = Color.White),
+                    colorFilter = ColorFilter.tint(color = Color.Black),
                     contentDescription = "Done"
                 )
             }
@@ -161,12 +168,12 @@ fun IndicatorIcon(stepState: StepState, toBeAnimated: Boolean, onAnimationDone: 
                 )
 
                 Image(
-                    painter = painterResource(id = R.drawable.ic_close_24),
+                    imageVector = Icons.Rounded.Close,
                     modifier = Modifier
                         .alpha(animatedAlpha.value)
                         .size(10.dp)
                         .align(Alignment.Center),
-                    colorFilter = ColorFilter.tint(color = Color.White),
+                    colorFilter = ColorFilter.tint(color = Color.Black),
                     contentDescription = "Error"
                 )
             }

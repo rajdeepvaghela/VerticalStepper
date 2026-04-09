@@ -9,7 +9,7 @@ sealed class StepState {
     data object InitiallyAnimating : StepState()
     data object Visible : StepState()
     data class Active(
-        @FloatRange(from = 0.0, to = 1.0) val progress: Float = 0f,
+        @param:FloatRange(from = 0.0, to = 1.0) val progress: Float = 0f,
         val color: Color = Color.Black
     ) : StepState()
 
